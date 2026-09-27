@@ -1,0 +1,27 @@
+# --- Secrets -----------------------------------------------------------------
+# A ManyChat API key grants full access to the account it belongs to.
+.env
+.env.*
+!.env.example
+
+# --- Build / deps ------------------------------------------------------------
+node_modules/
+dist/
+*.tsbuildinfo
+*.tgz
+
+# --- Test / tooling ----------------------------------------------------------
+coverage/
+.vitest/
+*.log
+npm-debug.log*
+.eslintcache
+
+# --- Editors / OS ------------------------------------------------------------
+*.code-workspace
+.DS_Store
+.claude/settings.local.json
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":semanticCommits"],
+  "timezone": "Etc/UTC",
+  "schedule": ["before 9am on monday"],
+  "prConcurrentLimit": 5,
+  "minimumReleaseAge": "3 days",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 9am on monday"]
+  },
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch"],
+      "groupName": "patch dependencies",
+      "automerge": true
+    },
+    {
+      "matchUpdateTypes": ["minor"],
+      "groupName": "minor dependencies"
+    },
+    {
+      "matchUpdateTypes": ["major"]
+    },
+    {
+      "matchDepTypes": ["dependencies"],
+      "rangeStrategy": "update-lockfile",
+      "description": "A published range is a promise to consumers. Raise it only when a major forces it, so installing this package never forces a newer zod on them."
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions",
+      "automerge": false
+    },
+    {
+      "matchDepTypes": ["engines", "packageManager"],
+      "groupName": "toolchain",
+      "automerge": false
+    },
+    {
+      "matchPackageNames": ["typescript"],
+      "allowedVersions": "<7.0.0",
+      "description": "typescript-eslint does not support TS 7 yet (typescript-eslint#10940)"
+    }
+  ]
+}

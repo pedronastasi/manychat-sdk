@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push: { branches: [main] }
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      # Every Node line the `engines` range admits, oldest first.
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with: { node-version: '${{ matrix.node }}', cache: pnpm }
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Format
+        run: pnpm format:check
+
+      # A bad Renovate config fails silently: the bot just stops opening PRs,
+      # which looks exactly like a repository with nothing to update. Run via
+      # npx, since renovate's dependency tree does not belong in the install.
+      - name: Validate Renovate config
+        if: matrix.node == 24
+        run: npx --yes --package renovate renovate-config-validator
+
+      - name: Test + coverage gate
+        run: pnpm test:coverage
+
+      - name: Build
+        run: pnpm build
+
+      # What npm would publish: exports resolve, types resolve, nothing missing.
+      - name: Check package
+        run: pnpm check:package
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with: { fetch-depth: 0 }
+      - name: Scan for committed secrets
+        uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  codeql:
+    runs-on: ubuntu-latest
+    permissions: { security-events: write, contents: read }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: github/codeql-action/init@v4
+        with: { languages: javascript-typescript }
+      - uses: github/codeql-action/analyze@v4

@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push: { branches: [main] }
+
+# Separate from ci.yml on purpose: ci.yml runs on pull requests from forks and
+# keeps `contents: read`. Merging the two would hand it write access.
+permissions: {}
+
+jobs:
+  release-please:
+    if: github.repository == 'pedronastasi/manychat-sdk'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@v5
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    # The environment npm's trusted publisher is pinned to, so only this job
+    # can mint a publish token.
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing (OIDC) needs npm 11.5.1 or later.
+      - run: npm install --global npm@latest
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+
+      # `prepack` builds. Trusted publishing attaches provenance on its own;
+      # NPM_TOKEN is only for the first release, before the package exists on
+      # npm to configure a trusted publisher for (CONTRIBUTING.md § Releasing).
+      - run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

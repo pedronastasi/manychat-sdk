@@ -1,0 +1,73 @@
+{
+  "name": "manychat-sdk",
+  "version": "0.0.0",
+  "description": "Unofficial, fully typed TypeScript client for the ManyChat API.",
+  "keywords": [
+    "manychat",
+    "whatsapp",
+    "instagram",
+    "messenger",
+    "chatbot",
+    "sdk",
+    "api-client",
+    "typescript"
+  ],
+  "homepage": "https://github.com/pedronastasi/manychat-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/pedronastasi/manychat-sdk/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pedronastasi/manychat-sdk.git"
+  },
+  "license": "MIT",
+  "author": "Pedro Nastasi",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.12"
+  },
+  "packageManager": "pnpm@12.6.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc --project tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "check:package": "publint --strict && attw --pack . --profile esm-only",
+    "prepack": "pnpm build"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.19.0",
+    "@vitest/coverage-v8": "^5.0.2",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
+    "publint": "^0.3.24",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^5.0.2"
+  }
+}
