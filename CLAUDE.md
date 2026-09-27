@@ -27,7 +27,8 @@ method per endpoint.
 - **Validation:** Zod 4, the only runtime dependency (ADR-0001)
 - **Testing:** Vitest 5, V8 coverage
 - **Linting:** ESLint 10 (type-aware), Prettier (100 chars, single quotes)
-- **Release:** release-please, npm trusted publishing with provenance
+- **Release:** release-please; CI stages each version through npm trusted
+  publishing (OIDC, provenance), and a maintainer approves it on npm with 2FA
 - **Dependencies:** Renovate
 - **Package manager:** pnpm
 

@@ -20,9 +20,18 @@ conversation, and the ability to message them. The SDK treats it that way.
   you would any log line that names a contact.
 - **The SDK writes nothing** to stdout, stderr or disk. It has no telemetry and
   talks to no host other than `baseUrl`.
-- **One runtime dependency**, `zod`. Releases are published from GitHub Actions
-  through npm trusted publishing, with provenance, so every published version
+- **One runtime dependency**, `zod`.
+
+## How releases reach npm
+
+- **Built in CI, with provenance.** GitHub Actions builds every version and
+  stages it on npm through trusted publishing (OIDC). Each published version
   can be traced to the commit and workflow that built it.
+- **Nothing goes live without a maintainer's 2FA.** A staged version becomes
+  installable only after a maintainer approves it on npm with 2FA.
+- **No token can publish.** The trusted publisher allows staging only, and the
+  package's publishing access disallows tokens. There is no npm token in this
+  repository, and a leaked token could not publish.
 
 ## Using it safely
 

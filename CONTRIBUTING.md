@@ -54,8 +54,20 @@ reverses one gets a new ADR that supersedes it, rather than an edit.
 
 Commit subjects follow Conventional Commits (`feat:`, `fix:`, `refactor:`,
 `docs:`, `test:`, `chore:`, `ci:`). They are the changelog: release-please reads
-them to open a Release PR, and merging that PR tags the version and publishes it
-to npm with provenance.
+them to open a Release PR.
+
+Releasing takes two approvals:
+
+1. **Merge the Release PR.** That tags the version, and the `publish` job
+   stages it on npm with provenance. It authenticates through npm trusted
+   publishing (OIDC), so there is no npm token in this repository.
+2. **Approve it on npm.** Open npmjs.com → `manychat-sdk` → **Staged Packages**,
+   review it, and approve with 2FA (or run `npm stage approve <stage-id>`).
+   Until then the version is not installable.
+
+The trusted publisher allows `npm stage publish` only, and the package's
+publishing access disallows tokens. So neither control of this repository nor a
+leaked token can ship a version without a maintainer's 2FA.
 
 A change that breaks a consumer (a renamed export, a narrowed parameter, a
 return type that is no longer produced) needs `!` after the type, or a
@@ -66,15 +78,14 @@ Patches merge on their own when CI is green; minors and majors wait for review.
 Runtime dependency updates are committed as `fix(deps):` and ship as a patch
 release. Dev dependency updates are committed as `chore(deps):` and do not.
 
-### Releasing for the first time
+### How 0.1.0 was published
 
-npm can only attach a trusted publisher to a package that already exists, so the
-first release needs a token:
+npm can attach a trusted publisher only to a package that already exists, and
+staged publishing cannot create one either. So 0.1.0 was published directly,
+using a short-lived granular token with "bypass 2FA" held as the `npm`
+environment's `NPM_TOKEN` secret. The trusted publisher was configured
+immediately afterwards, the secret was deleted, and the token was revoked.
 
-1. On npmjs.com, create a granular access token that can publish, and save it
-   as the `NPM_TOKEN` secret of the `npm` environment in this repository.
-2. Merge the first Release PR. The `publish` job publishes with that token.
-3. On npmjs.com, open the package's settings and add a trusted publisher: this
-   repository, workflow `release.yml`, environment `npm`.
-4. Delete the `NPM_TOKEN` secret and revoke the token. Later releases
-   authenticate through OIDC, and no long-lived credential is left to leak.
+The trusted publisher is pinned to this repository, workflow `release.yml` and
+environment `npm`, which only `main` may deploy to. Renaming any of those breaks
+publishing until the trusted publisher on npmjs.com is updated to match.

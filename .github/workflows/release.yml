@@ -42,15 +42,14 @@ jobs:
           cache: pnpm
           registry-url: https://registry.npmjs.org
 
-      # Trusted publishing (OIDC) needs npm 11.5.1 or later.
+      # `npm stage publish` needs npm 11.15.0 or later.
       - run: npm install --global npm@latest
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
 
-      # `prepack` builds. Trusted publishing attaches provenance on its own;
-      # NPM_TOKEN is only for the first release, before the package exists on
-      # npm to configure a trusted publisher for (CONTRIBUTING.md § Releasing).
-      - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # Staged, not published: the version goes live only when a maintainer
+      # approves it on npmjs.com with 2FA, so control of this workflow alone
+      # cannot ship a release. The trusted publisher does not allow direct
+      # `npm publish`. `prepack` builds.
+      - run: npm stage publish --provenance --access public
